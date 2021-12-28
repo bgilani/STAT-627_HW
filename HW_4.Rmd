@@ -1,0 +1,254 @@
+---
+title: 'HW #4'
+author: "Bilal Gilani"
+date: "9/27/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1.
+
+### a. 
+
+```{r}
+set.seed(1)
+x1 <- runif(100)
+x2 <- 0.5 * x1 + rnorm(100) / 10
+y <- 2 + 2 * x2 + rnorm(100)
+```
+
+$Y = 2 + 2X_1 + 0.3X_2 + \epsilon$
+
+### b.
+
+```{r}
+cor(x1, x2)
+```
+
+```{r}
+plot(x1, x2)
+```
+
+### c.
+
+```{r}
+lm1 <- lm(y ~ x1 + x2)
+summary(lm1)
+```
+We can reject the null hypothesis that $\beta_2 = 0$ because of the p-value of 0.0188. In the case of $\beta_1$, 
+however, we would fail to reject the null hypothesis that $\beta_1 = 0$ because of the p-value of 0.4390
+
+### d. 
+
+```{r}
+lm.x1<- lm(y ~ x1)
+summary(lm.x1)
+```
+In a model where there is no $X2$ We can reject the null hypothesis that $\beta_1 = 0$ because of a p-value of 0.0329.
+
+### e. 
+
+```{r}
+lm.x2 <- lm(y ~ x2)
+summary(lm.x2)
+```
+In this model, we can reject the null hypothesis that $\beta_1 = 0$ because the p-value is 0.00202.
+
+### f.
+
+No the results do not contradict each other because multicollinearity exists between `x1` and `x2`, making it difficult to distinguish their effects on `y`.
+
+### g.
+
+```{r}
+x1 <- c(x1, 0.1)
+x2 <- c(x2, 0.8)
+y <- c(y, 6)
+```
+
+
+```{r}
+cor(x1, x2)
+plot(x1, x2)
+```
+If we include the new observations, we can see that there is a lower correlation $X1$ and $X2$. In addition, there is a 
+clar output in the top-left corner of the plot, which corresponds to out new value.
+
+
+```{r}
+lm2 <- lm(y ~ x1 + x2)
+summary(lm2)
+par(mfrow = c(2, 2))
+plot(lm2)
+```
+The full model shows that we fail to reject that $\beta_1 = 0$ becayse of the p-value of 0.0619. However, we can still
+conclude that $\beta_2 \neq 0$. The leverage plot suggests that the 101st oberservation acts as a high leverage point but
+it does not exceed the 2 outlier threshold in regards to studentized residuals.
+
+```{r}
+lm3 <- lm(y ~ x1)
+summary(lm3)
+par(mfrow = c(2, 2))
+plot(lm3)
+```
+$X1$ on its own does not have a relationship with $Y$, we come to this conclusion because of the p-value of 0.122. In this
+model, observation 101 is both a studentized residual (above the value of 2) as well as a high leverage point.
+
+```{r}
+lm4 <- lm(y ~ x2)
+summary(lm4)
+par(mfrow = c(2, 2))
+plot(lm4)
+```
+$X2$ has a relationship with $Y$, we come to this conclusion because of the p-value of 0.00015. Similar to the **lm3** 
+model, oberservation 101 again acts as a high leverage point and outlier.
+
+For **lm3**, the slope of $X1$ is reduced compared to the previous iteration. In **lm4** $beta_1$ estimate shows an increase of slope against $Y$.  
+
+### h.
+
+Based on the outputs above:
+
+- `lm2`: 1.06
+- `lm3`: 1.14
+- `lm4`: 1.073
+
+The full model, or `lm2`, has the lowest standard error, meaning that it produces the most reliable estimates despite the lack of significance of `x1`.  
+
+## i.
+
+```{r, message=FALSE}
+library(car)
+```
+
+```{r}
+vif(lm1)
+```
+
+```{r}
+vif(lm2)
+```
+Based off of the output, we can see that the model WITH the outlier has less multicollineatity than the model with the
+outlier. The reason that the model with the outlier performed better was because the multicollinearity among the predictors allowed us to properly identify $X1$ and $X2$'s effects on $Y$.
+
+An example with the problem with multicollinearity would be if we were looking to predict how fast someone can run based
+off of leg length and something else like height. I cannot claim that I know they are correlated but let us assume that
+they are. It would be pointless to use these two variables because we know that they are correlated. Replacing height with
+something else like weight would help in being more accurate with a prediction.
+
+## 3.
+
+### a.
+
+$p(X) = 0.37/1.37$
+```{r}
+0.37/1.37
+```
+
+### b.
+
+$p(X) = 0.16/0.84$
+```{r}
+0.16/0.84
+
+```
+
+## 4.
+
+$\beta_0$ = -6
+$\beta_1$ = 0.05
+$\beta_2$ = 1
+
+
+### a.
+
+$e^-0.05/(1 + e^-0.05)$
+```{r}
+exp(-0.5)/(1 + exp(-0.5))
+
+```
+
+### b.
+
+$(log(1) + 2.5)/0.05$
+```{r}
+(log(1) + 2.5)/0.05
+
+```
+ 
+## 5.
+
+# 5.
+
+### a.
+
+Distance formula:
+
+$d(p,q) = \sqrt{(q_1-p_1)^2 +\cdot\cdot\cdot + (q_n - p_n)^2}$
+
+Observation distances:
+
+1. 3
+
+2. 2
+
+3. 3.16
+
+4. 2.23
+
+5. 1.41
+
+6. 1.73
+
+### b.
+
+When $K=1$, our prediction should be green because the Euclidean distance to observation 5 is the lowest at 1.41.
+
+###  c.
+
+When $K=3$, our prediction should be red because we have 2 red observations (distance of 1.73 and 2) and 1 green observation 
+(distance of 1.41) within our boundary.  Because of the majority rule, we must go with red for our test observation.  
+
+###  d.
+
+If the decision boundary is highly non-linerar, then we can can expect that a lower $K$ would work higher than a $K$ of a higher value because it a higher value of $K$ would make our model less flexible. Conversely, the lower valued $K$ would
+allow the model to be more flexible, which would be better if we find that we find that we have a non-linear decision
+boundary.
+
+
+## 6.
+
+### a.
+The QDA would perform better on the training set because of its flexibility, meanwhile LDA would perform better on a test
+set.
+
+### b.
+When it comes to a training set, we would expect QDA to do better, again because of its high flexibility. In the case of a testing set, it depends on the nonlinearity. We should expect the QDA to perform better but there will be some non-linear
+relationships that can work with LDA.
+
+### c.
+We would expect that the "test prediction accuracy" of QDA to be improve compared to LDA, again because of its high flexibility. The larger the sample size, the less of a concern there is for inaccuracies or variances.
+
+### d.
+False, because if there are not many predictors, than the highly flexibile QDA can overfit. If there are a lower number of observations, then LDA should be preferred, as it will likely perform better.
+
+## 7.
+
+We can use the formula to obtain the posterior probability of x.
+
+$p_1(4) = \frac{0.8e^{-(1/72)(4-10)^2}}{0.8e^{-(1/72)(4-10)^2} + 0.2e^{-(1/72)(4-0)^2}} = 0.752$
+
+If we are given a value of 4, then the probability that a company issues a dividend is 0.752.
+
+
+
+
+
+
+
+
+
+

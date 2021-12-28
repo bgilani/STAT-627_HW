@@ -1,0 +1,113 @@
+---
+title: 'HW #8'
+author: "Bilal Gilani"
+date: "11/24/2020"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1.
+
+### a.
+```{r}
+x1 <- c(3, 2, 4, 1, 2, 4, 4)
+x2 <- c(4, 2, 4, 4, 1, 3, 1)
+
+colors = c("red", "red", "red", "red", "blue", "blue", "blue")
+
+plot(x1, x2, col = colors, xlim = c(0, 4), ylim = c(0, 4)) ## used the limits because it makes it cleaner, didnt like that it 
+                                                           ## originally went up by 0.5
+
+```
+
+### b.
+```{r}
+plot(x1, x2, col = colors, xlim = c(0, 4), ylim = c(0, 4))
+abline(-0.5, 1)
+
+
+```
+It appears that the points: (2,1) and (2,2) are on one end of where the optimal seperating hyperplane has to be, whereas on the other end 
+the points are (4,3) and (4,4). By subtracting we find that the line must pass through the points (2,1.5) and (4,3.5). The resulting equation
+is $X_1 - X_2 - 0.5 = 0$
+
+### c.
+The classifications are: 
+
+$ -0.5 + X_1 - X_2 > 0$ is **BLUE**
+$ -0.5 + X_1 - X_2 ≤ 0$ is **RED**
+
+### d.
+```{r}
+plot(x1, x2, col = colors, xlim = c(0, 4), ylim = c(0, 4))
+abline(-0.5, 1)
+abline(-1, 1, lty = 2)
+abline(0, 1, lty = 2)
+
+
+```
+
+### e.
+As previously mentioned, the points are: (2,1), (2,2), (4,3), and (4,4).
+
+### f.
+Moving the seventh observation/point (4,1) would not do anything to the hyperplane is it is not relevant to the hyperplane's position.
+(4,1) is not a *supper vector* as indicated by the answer in part E.
+
+### g.
+```{r}
+plot(x1, x2, col = colors, xlim = c(0, 4), ylim = c(0, 4))
+abline(-0.75, 1)
+
+```
+The equation for this hyperplane would be $X_1 - X_2 - 0.75 = 0$.
+
+### h.
+```{r}
+plot(x1, x2, col = colors, xlim = c(0, 4), ylim = c(0, 4))
+points(c(3), c(1), col = c("red"))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

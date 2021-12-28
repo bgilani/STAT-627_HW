@@ -1,0 +1,390 @@
+---
+title: 'HW #6'
+author: "Bilal Gilani"
+date: "10/26/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1.
+
+### a.
+**Lasso compared to least square regression**
+
+**iii.**: The method is less flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease 
+in variance.
+
+### b.
+**Ridge regression compared to least square regression**
+
+**iii.**:The method is less flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease 
+in variance.
+
+### c.
+**Fitting non-linear trends compared to least square regression**
+
+**ii.**: The method is more flexible and hence will give improved prediction accuracy when its increase in variance is less than its decrease 
+in bias.
+
+## 2.
+
+### a.
+```{r}
+y <- 1
+lambda <- 2
+beta <- seq(-10, 10, 0.1)
+
+plot(beta, (y - beta)^2 + lambda * beta^2, pch = 20)
+```
+**Ridge Minima:** 
+
+```{r}
+y / (1 - lambda)
+```
+
+**Lasso Minima:** 
+
+```{r}
+lambda / 2
+-lambda /2
+```
+Since the absolute value of Y is less than or equal to lamba divided by 2, the lasso minima must be 0.
+
+### b.
+
+```{r}
+y <- seq(-1, 1, 0.1)
+beta <- seq(-1, 1, 0.1)
+
+plot(y, beta, "l")
+lines(y, beta * -1, pch = 20, col = "red")
+lines(y, beta * 0, pch = 20, col = "blue") ## not sure here
+```
+
+
+
+
+## 3.
+
+### a.
+```{r}
+X <- rnorm(100)
+noise <- rnorm(100)
+
+```
+
+### b.
+```{r}
+b0 <- 2
+b1 <- 4
+b2 <- 6
+b3 <- 0.8
+
+y <- b0 + b1 * X + b2 * X^2 + b3 * X^3 + noise
+
+y
+
+
+```
+
+### c.
+
+```{r}
+library(leaps)
+
+df <- data.frame(y = y, x = X)
+lm.full <- regsubsets(y ~ x + I(x^2) + I(x^3) + I(x^4) + I(x^5) + I(x^6) + I(x^7) + I(x^8) + I(x^9) + I(x^10), df, nvmax = 10)
+
+lmsummary <- summary(lm.full)
+
+par(mfrow = c(2, 2))
+plot(lmsummary$cp, type = "l")
+plot(lmsummary$bic, type = "l")
+plot(lmsummary$adjr2, type = "l")
+```
+It seems as though the values we should select is about 3, maybe 4. The next step would be to see the where CP and BIC are at their lowest 
+and ADJR2 is at its peak.
+
+```{r}
+coef(lm.full, which.max(lmsummary$adjr2))
+coef(lm.full, which.min(lmsummary$bic))
+coef(lm.full, which.min(lmsummary$cp))
+```
+
+The output shows that ADJR2 suggest 7 variables, BIC suggests 3 variables, and CP suggests 7 variables.
+
+### d.
+
+```{r}
+lm.full <- regsubsets(y ~ x + I(x^2) + I(x^3) + I(x^4) + I(x^5) + I(x^6) + I(x^7) + I(x^8) + I(x^9) + I(x^10), df, nvmax = 10, method = "forward")
+
+lmsummary <- summary(lm.full)
+
+par(mfrow = c(2, 2))
+plot(lmsummary$cp, type = "l")
+plot(lmsummary$bic, type = "l")
+plot(lmsummary$adjr2, type = "l")
+```
+
+```{r}
+coef(lm.full, which.max(lmsummary$adjr2))
+coef(lm.full, which.min(lmsummary$bic))
+coef(lm.full, which.min(lmsummary$cp))
+```
+
+When using forward selection, ADJR2 suggests 10 variables, BIC suggests 3 variables, and CP suggests 6 variables.
+
+```{r}
+lm.full <- regsubsets(y ~ x + I(x^2) + I(x^3) + I(x^4) + I(x^5) + I(x^6) + I(x^7) + I(x^8) + I(x^9) + I(x^10), df, nvmax = 10, method = "backward")
+
+lmsummary <- summary(lm.full)
+
+par(mfrow = c(2, 2))
+plot(lmsummary$cp, type = "l")
+plot(lmsummary$bic, type = "l")
+plot(lmsummary$adjr2, type = "l")
+```
+
+```{r}
+coef(lm.full, which.max(lmsummary$adjr2))
+coef(lm.full, which.min(lmsummary$bic))
+coef(lm.full, which.min(lmsummary$cp))
+```
+When using backward selection, all three suggests 7 variables.
+
+### e.
+
+```{r}
+library(glmnet)
+```
+
+```{r}
+Xmatrix <- model.matrix(y ~ x + I(x^2) + I(x^3) + I(x^4) + I(x^5) + I(x^6) + I(x^7) + I(x^8) + I(x^9) + I(x^10), data = df)[, -1]
+cv.lasso <- cv.glmnet(Xmatrix, y, alpha = 1)
+plot(cv.lasso)
+```
+
+
+```{r}
+lambdamin <- cv.lasso$lambda.min
+lambdamin
+```
+
+```{r}
+lasso <- glmnet(Xmatrix, y, alpha = 1)
+predict(lasso, s = lambdamin, type = "coefficients")
+```
+
+The results of the Lasso model coefficients above show that our model chose variables $x$, $x^2$, $x^3$, $x^9$, and $x^10$ for the final model predictors (in addition to the intercept).
+
+### f.
+
+```{r}
+b7 <- 7
+y <- b0 + b7 * X^7 + noise
+regfit <- regsubsets(y ~ x + I(x^2) + I(x^3) + I(x^4) + I(x^5) + I(x^6) + I(x^7) + I(x^8) + I(x^9) + I(x^10), data = df, nvmax = 10)
+
+regsummary <- summary(regfit)
+
+par(mfrow = c(2, 2))
+plot(regsummary$cp, xlab = "Number of variables", ylab = "C_p", type = "l")
+plot(regsummary$bic, xlab = "Number of variables", ylab = "BIC", type = "l")
+plot(regsummary$adjr2, xlab = "Number of variables", ylab = "Adjusted R^2", type = "l")
+```
+
+```{r}
+coef(regfit, which.max(regsummary$adjr2))
+coef(regfit, which.min(regsummary$bic))
+coef(regfit, which.min(regsummary$cp))
+```
+Both ADJR2 and CP suggest a 7 variable model, whereas BIC suggests a 3 variable.
+
+```{r}
+cv.lasso <- cv.glmnet(Xmatrix, y, alpha = 1)
+labmdamin <- cv.lasso$lambda.min
+lambdamin
+```
+
+```{r}
+lasso <- glmnet(Xmatrix, y, alpha = 1)
+predict(lasso, s = labmdamin, type = "coefficients")
+```
+The results of Lasso suggest that our model picks $x^5$, $x^7$, $x^9$ and the intercept as predictors.
+
+## 4.
+
+```{r}
+library(ISLR)
+data("College")
+```
+
+```{r}
+attach(College)
+set.seed(100)
+n <- length(Apps)
+Z <- sample(n,n/2)
+
+train <- College[Z, ]
+test <- College[-Z, ]
+
+```
+
+### a.
+
+LEAST SQUARES REGRESSION
+```{r}
+lm.train <- lm(Apps ~ ., data = train)
+lm.test <- predict(lm.train, newdata = test)
+
+mse <- mean((lm.test - test$Apps)^2)
+
+rmse1 <- sqrt(mse)
+
+rmse1
+```
+The RMSE when it comes to LEAST SQUARES Regression is **1226.581**. This amount is the variance we can expect in terms of applications. So we
+can expect our prediction to be incorrect by about 1,188 applications.
+
+
+### b.
+
+RIDGE REGRESSION
+```{r}
+train2 <- model.matrix(Apps ~ ., data = train)
+test2 <- model.matrix(Apps ~ ., data = test)
+
+grid <- 10^seq(4,-2,length = 100)
+
+library(glmnet)
+ridge <- glmnet(train2, train$Apps, alpha = 0, lambda = grid)
+cv.ridge <- cv.glmnet(train2, train$Apps, alpha = 0, lambda = grid) ## cross-validation
+
+lambdamin <- cv.ridge$lambda.min
+
+lambdamin
+
+pred.ridge <- predict(ridge, s = lambdamin, newx = test2)
+
+mse <- mean((test$Apps - pred.ridge)^2)
+
+rmse2 <- sqrt(mse)
+
+rmse2
+
+```
+The RMSE when it comes to RIDGE regression is **1253.288**. This is a larger value than that of the least squares regression, as a result, ridge 
+regression performs worse than least squares regression.
+
+### c.
+
+LASSO
+```{r}
+lasso <- glmnet(train2, train$Apps, alpha = 1, lambda = grid)
+cv.lasso <- cv.glmnet(train2, train$Apps, alpha = 1, lambda = grid) ## cross validation, note the difference
+
+lambdamin <- cv.lasso$lambda.min
+
+pred.lasso <- predict(lasso, s = lambdamin, newx = test2)
+
+mse <- mean((test$Apps - pred.lasso)^2)
+
+rmse3 <- sqrt(mse)
+
+rmse3
+
+```
+The RMSE when it comes to LASSO regression is **1230.749**. This is a larger value than that of the least squares regression, but lower than that 
+of regression. Therefore, lasso regression performs worse than least squares regression (not by much) but better than ridge regression.
+
+## d.
+
+PCR model
+```{r}
+library(pls)
+
+pcrmodel <- pcr(Apps ~ . - Private + as.factor(Private), data = train, scale = TRUE, validation = "CV")
+validationplot(pcrmodel)
+
+summary(pcrmodel)
+
+## based off the plot and summary, seems like 10 is the appropriate value for M
+
+pred.pcr <- predict(pcrmodel, test, ncomp = 10)
+
+mse <- mean((pred.pcr - test$Apps)^2)
+
+rmse4 <- sqrt(mse)
+
+rmse4
+
+```
+The RMSE when it comes to PCR is **1737.057**. This is a larger value than least squares, ridge, and lasso regression. It has so far performed
+the worst out of all the models we have ran thus far.
+
+### e.
+
+PLS model
+```{r}
+plsmodel <- plsr(Apps ~ . - Private + as.factor(Private), data = train, scale = TRUE, validation = "CV")
+validationplot(plsmodel)
+
+summary(plsmodel)## lowest CV is at 10 again
+
+pred.pls <- predict(plsmodel, test, ncomp = 10)
+
+mse <- mean((pred.pls - test$Apps)^2)
+
+rmse5 <- sqrt(mse)
+
+rmse5
+```
+The RMSE when it comes to PLS is **1228.742**. This is a the lowest value of the five models that were tested, it performs better than least squares,
+ridge, lasso, and PCR regression.
+
+So what do the values mean?
+```{r}
+## LEAST SQUARES
+rmse1
+
+## RIDGE
+rmse2
+
+## LASSO
+rmse3
+
+## PCR
+rmse4
+
+## PLS
+rmse5
+
+```
+Because PLS had the lowest value, it can be inferred that it would be the most accurate choice for a model.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

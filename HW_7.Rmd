@@ -1,0 +1,159 @@
+---
+title: 'HW # 7'
+author: "Bilal Gilani"
+date: "11/13/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1.
+
+Please see attached:
+
+## 2.
+```{r}
+majority <- c(0.1, 0.15, 0.2, 0.2, 0.55, 0.6, 0.6, 0.65, 0.7, 0.75) ## 10 values given
+
+table(majority > 0.5)
+## 6 for Red and 4 for Green
+mean(majority)
+## average of the 10 values is 0.45
+```
+In the case of a majority vote, X would belong in the Red class. However, in the case of taking the average probability, X does **NOT** belong
+in the Red class.
+
+
+## 3.
+
+```{r}
+library(ISLR)
+
+data("OJ")
+attach(OJ)
+head(OJ)
+```
+
+### a.
+
+```{r}
+set.seed(1)
+
+Z <- sample(1:nrow(OJ), 800)
+train <- OJ[Z, ]
+test <- OJ[-Z, ]
+```
+
+### b.
+
+```{r}
+library(tree)
+
+tree.fit <- tree(Purchase ~ ., data = train)
+summary(tree.fit)
+```
+There are 9 terminal nodes, with the training error rate being 0.1588.
+
+### c.
+
+```{r}
+tree.fit
+```
+
+The first terminal node that pops up is $8$ so I will use that one. Number $8$ has a split criterion of **LoyalCH** < 0.036.  This terminal node has 59 observations, has a deviance of 10.14, and selects Minute Maid as it's final selection.  About 1.7% of the observations take on the value of Citrus Hill while the remaining 98.3% take on the value of Minute Maid.
+
+### d.
+
+```{r}
+plot(tree.fit)
+text(tree.fit, pretty = 0)
+```
+The plot shows that when **LoyalCH** is below 0.5036, the majority of the preferred choices are Minute Maid. Citrus Hill is only selected if the 
+**Price Difference** is above 0.05 OR if in the case that Price Difference is less than 0.05, **SpecialCH** is greater than 0.5. On the other side,
+Citrus Hill is the preferred choice except in the case where **LoyalCH** is less than 0.765, the **ListPriceDiff** is less than 0.235 and finally 
+when **PctDiscMM** is greater than 0.196.
+### e.
+
+```{r}
+preds.tree <- predict(tree.fit, test, type = "class")
+
+table(preds.tree, test$Purchase) ## create confusion matrix
+
+
+1 - mean(preds.tree == test$Purchase) ## test error rate
+```
+
+The test error rate is about 17%.  
+
+### f.
+
+```{r}
+cv.tree.fit <- cv.tree(tree.fit, FUN = prune.misclass) # doing cv on model that was set on training set
+cv.tree.fit 
+```
+
+### g.
+
+```{r}
+plot(cv.tree.fit$size, cv.tree.fit$dev, type = "b", 
+     xlab = "Tree size", ylab = "Deviance") ## cv tree error plot
+```
+
+### h.
+
+7 terminal nodes appears to have the lowest level of deviance, which differs from the 9 terminal nodes in the previous case.
+
+### i.
+
+```{r}
+prune.tree.fit <- prune.misclass(tree.fit, best = 7) ## create pruned tree object
+
+plot(prune.tree.fit)
+text(prune.tree.fit, pretty = 0)
+```
+
+### j.
+
+```{r}
+summary(tree.fit)
+
+summary(prune.tree.fit)
+
+## comparing error rates
+```
+The error rate of the pruned tree (0.1625) is higher than the error rate of our non-pruned treet's error rate (0.1588).
+
+### k.
+
+```{r}
+preds.pruned <- predict(prune.tree.fit, test, type = "class")
+
+table(preds.pruned, test$Purchase) ## again, create a confusion matrix
+```
+
+```{r}
+
+1 - mean(preds.pruned == test$Purchase) ## test error rate
+```
+
+The test error rate of the pruned tree is lower than the test error rate of the original (pre-pruned) tree by 1% (16% vs. 17%).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
